@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <title>MASTER CONTROL V9.8 (SECURE)</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
     <style>
         body { font-family: 'Segoe UI', sans-serif; padding: 10px; background: #eceff1; font-size: 11px; color: #333; overflow: hidden; }
         
-        /* 1. LAYAR LOGIN (TUMPUKAN PALING ATAS) */
+        /* LAYAR LOGIN (TUMPUKAN PALING ATAS) */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #212121; z-index: 999999;
@@ -21,7 +18,7 @@
         .btn-enter { background: #D81B60; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 900; font-size: 16px; letter-spacing: 1px; transition: 0.2s; }
         .btn-enter:hover { background: #ad1457; transform: scale(1.02); }
 
-        /* 2. KONTEN UTAMA (DISEMBUNYIKAN) */
+        /* KONTEN UTAMA (DISEMBUNYIKAN) */
         #main-app { display: none; }
 
         /* TABEL & UI */
@@ -171,7 +168,6 @@
                 // SALAH
                 const err = document.getElementById('err-msg');
                 err.style.display = 'block';
-                err.classList.add('shake'); // Animasi getar (opsional)
             }
         }
 
@@ -279,7 +275,6 @@
         }
         async function del(id) { if(isUnlocked && confirm('Hapus?')) await db.from('matches').delete().eq('id', id); }
 
-        // UTILS
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function showToast() { const t=document.getElementById('toast'); t.style.display='block'; setTimeout(()=>t.style.display='none',800); }
