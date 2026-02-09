@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
     <style>
-        /* --- COPY PASTE DARI DESAIN 14 FEBRUARI (JANGAN UBAH) --- */
+        /* --- VARIABLES --- */
         :root { 
             --primary: #C2185B;      
             --primary-dark: #880E4F; 
@@ -42,7 +42,7 @@
             overflow: hidden; margin-bottom: 15px;
         }
 
-        /* DESAIN RAKET PADEL (CSS) */
+        /* DESAIN RAKET PADEL (CSS BACKGROUND) */
         .padel-racket-bg {
             position: absolute;
             top: -40px; right: -50px;
@@ -103,6 +103,8 @@
         th { background: white; color: #999; padding: 8px 5px; font-size: 9px; font-weight: 800; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; }
         td { padding: 8px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; color: #444; font-weight: 600; }
         th:nth-child(2), td:nth-child(2) { text-align: left; padding-left: 8px; width: 45%; }
+        
+        /* WARNA JUARA (Kuning Lembut) */
         tr.status-win { background-color: #FFFDE7; }
 
         /* ATURAN */
@@ -173,7 +175,7 @@
     </div>
 
     <script>
-        // --- KONEKSI DATABASE SUPABASE (JANGAN DIUBAH) ---
+        // --- KONEKSI DATABASE SUPABASE ---
         const SUPABASE_URL = 'https://gubcvxiupehbdpigrdct.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_k1y6fNI2opEXhwqKMbGYcA__2nD0yT6';
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -192,9 +194,8 @@
             renderKlasemen();
         }
 
-        // --- HELPER UNTUK MEMBUAT KARTU HTML (STYLE 14 FEB) ---
+        // --- HELPER BUAT KARTU ---
         function createCardHTML(m) {
-            // Logic Skor (Total Game)
             let sA = m.set1_a + m.set2_a + m.set3_a + m.set4_a + m.set5_a;
             let sB = m.set1_b + m.set2_b + m.set3_b + m.set4_b + m.set5_b;
             let skorText = `${sA} - ${sB}`;
@@ -205,27 +206,22 @@
             let metaHTML = '';
             let smallPointHTML = '';
 
-            // Meta Info Logic
             let courtBadge = `<span class="court-badge">${m.court_name}</span>`;
 
             if (isLive) {
-                // Jika Live: Tampilkan Badge Live Hijau, Skor Neon, Poin Kecil
                 metaHTML = `<div class="meta-info"><div class="live-tag"><div class="dot-live"></div> LIVE</div>${courtBadge}</div>`;
                 smallPointHTML = `<span class="small-points" style="color:black">${m.points_a} - ${m.points_b}</span>`;
             } else {
-                // Jika Tidak Live
                 let time = m.time || '';
                 let date = m.date || '';
                 metaHTML = `<div class="meta-info"><span>${date} ${time}</span>${courtBadge}</div>`;
                 
-                // Jika Belum Main (0-0 & Pending) -> Tampilkan "VS"
                 if(m.status === 'PENDING' && sA+sB === 0) {
                     skorText = "VS";
                     scoreClass = "score-pill empty";
                 }
             }
 
-            // HTML KARTU (STRUKTUR SAMA PERSIS DENGAN KODE 14 FEB)
             return `
             <div class="match-card ${liveClass}">
                 <div class="card-header-row">
@@ -243,29 +239,27 @@
             </div>`;
         }
 
-        // 1. RENDER JADWAL (Hanya Grup)
+        // 1. RENDER JADWAL (Group Only)
         function renderJadwal() {
             const el = document.getElementById('jadwal-content');
             el.innerHTML = "";
-            // Filter: Hanya yang mengandung kata "grup"
             const list = matches.filter(m => m.round.toLowerCase().includes('grup'));
 
             if(list.length === 0) { el.innerHTML = '<div class="empty-text">Belum ada jadwal penyisihan.</div>'; return; }
             list.forEach(m => { el.innerHTML += createCardHTML(m); });
         }
 
-        // 2. RENDER BAGAN (Hanya Knockout)
+        // 2. RENDER BAGAN (Knockout Only)
         function renderBagan() {
             const el = document.getElementById('bagan-content');
             el.innerHTML = "";
-            // Filter: Yang TIDAK mengandung kata "grup"
             const list = matches.filter(m => !m.round.toLowerCase().includes('grup'));
 
             if(list.length === 0) { el.innerHTML = '<div class="empty-text">Belum ada pertandingan babak gugur.</div>'; return; }
             list.forEach(m => { el.innerHTML += createCardHTML(m); });
         }
 
-        // 3. RENDER KLASEMEN (Style 14 Feb)
+        // 3. RENDER KLASEMEN (LOGIKA BARU: HANYA RANK 1 KUNING)
         function renderKlasemen() {
             const el = document.getElementById('klasemen-content');
             el.innerHTML = "";
@@ -277,10 +271,10 @@
             grupMatches.forEach(m => {
                 let gName = m.round;
                 if(!groups[gName]) groups[gName] = {};
-                // Init
+                
                 [m.team_a, m.team_b].forEach(t => { if(!groups[gName][t]) groups[gName][t] = { mp:0, w:0, l:0, gd:0 }; });
                 
-                // Hitung Logic
+                // Hitung Point Jika FINISHED
                 if(m.status === 'FINISHED') {
                     let sA = groups[gName][m.team_a], sB = groups[gName][m.team_b];
                     sA.mp++; sB.mp++;
@@ -298,7 +292,8 @@
 
                 let rows = "";
                 sorted.forEach((t, i) => {
-                    let hl = i < 2 ? 'class="status-win"' : '';
+                    // LOGIC BARU: i === 0 (Rank 1) saja yang kuning
+                    let hl = (i === 0) ? 'class="status-win"' : '';
                     rows += `
                     <tr ${hl}>
                         <td>${i+1}</td>
