@@ -1,4 +1,153 @@
-<div id="view-peraturan" class="container hidden rules-box">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PADEL LOVERS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <style>
+        /* --- VARIABLES --- */
+        :root { 
+            --primary: #C2185B;      
+            --primary-dark: #880E4F; 
+            --accent: #F8BBD0;       
+            --bg-color: #FDF2F5;     
+            --live-neon: #76FF03;    
+            --padel-neon: #CCFF00; 
+            --text-dark: #333;
+            --card-shadow: 0 3px 10px rgba(194, 24, 91, 0.08); 
+        }
+        
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#E91E63 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            margin: 0; padding-bottom: 80px; color: var(--text-dark); 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* HEADER STYLE */
+        .header-wrapper {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 15px 15px 25px 15px; 
+            text-align: center; color: white;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            position: relative; z-index: 99; 
+            box-shadow: 0 4px 15px rgba(136, 14, 79, 0.2);
+            overflow: hidden; margin-bottom: 15px;
+        }
+
+        /* DESAIN RAKET PADEL (CSS BACKGROUND) */
+        .padel-racket-bg {
+            position: absolute;
+            top: -40px; right: -50px;
+            width: 180px; height: 200px;
+            border-radius: 90px 90px 60px 60px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.2) 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: center;
+            transform: rotate(30deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header-content { position: relative; z-index: 1; }
+        .header-title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px; } 
+        .header-sub { font-size: 12px; font-weight: 600; margin-top: 2px; opacity: 0.95; color: #FFECB3; }
+        .header-tag { display: inline-block; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 15px; font-size: 9px; font-weight: 800; }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 0 12px; }
+        .hidden { display: none; }
+
+        /* KARTU PERTANDINGAN */
+        .match-card { 
+            background: white; padding: 10px 15px; margin-bottom: 10px; 
+            border-radius: 15px; box-shadow: var(--card-shadow);
+            border: 1px solid rgba(194, 24, 91, 0.05); position: relative; transition: transform 0.2s;
+        }
+        .card-header-row { margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 6px; }
+        .babak-pill { background: #FFF3E0; color: #E65100; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; text-transform: uppercase; display: inline-block; }
+        
+        .card-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #888; margin-bottom: 8px; }
+        .meta-info { display: flex; align-items: center; gap: 6px; }
+        .court-badge { background: #f5f5f5; color: #555; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; border: 1px solid #eee; }
+
+        /* LIVE STATE */
+        .match-card.is-live { border: 2px solid var(--live-neon); box-shadow: 0 0 10px rgba(118, 255, 3, 0.2); }
+        .match-card.is-live .score-pill { background: var(--live-neon); color: black; box-shadow: 0 0 8px var(--live-neon); animation: pulse-score 1.5s infinite; }
+        .live-tag { color: #4CAF50; font-weight: 800; font-size: 9px; display: flex; align-items: center; gap: 4px; background: #e8f5e9; padding: 1px 6px; border-radius: 4px; }
+        .dot-live { width: 6px; height: 6px; background: var(--live-neon); border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes pulse-score { 50% { transform: scale(1.05); } }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .match-body { display: flex; align-items: center; justify-content: space-between; }
+        .team { flex: 1; font-weight: 600; font-size: 13px; line-height: 1.2; color: #444; }
+        .team.left { text-align: left; }
+        .team.right { text-align: right; }
+        
+        .score-pill { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 5px 14px; border-radius: 20px; font-size: 18px; font-weight: 800; min-width: 50px; text-align: center; box-shadow: 0 3px 8px rgba(194, 24, 91, 0.2); margin: 0 10px; display:flex; flex-direction:column; justify-content:center; }
+        .score-pill.empty { background: white; color: var(--primary); border: 2px solid var(--accent); box-shadow: none; font-size: 13px; padding: 3px 12px; }
+        
+        .small-points { font-size: 10px; display: block; margin-top: 2px; }
+
+        /* TABEL KLASEMEN */
+        .grup-card { background: white; border-radius: 12px; margin-bottom: 15px; overflow: hidden; box-shadow: var(--card-shadow); border: none; }
+        .grup-header { background: #FFF0F5; padding: 10px 15px; color: var(--primary); font-size: 13px; font-weight: 800; border-bottom: 1px solid #fce4ec; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { background: white; color: #999; padding: 8px 5px; font-size: 9px; font-weight: 800; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; }
+        td { padding: 8px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; color: #444; font-weight: 600; }
+        th:nth-child(2), td:nth-child(2) { text-align: left; padding-left: 8px; width: 45%; }
+        
+        /* WARNA JUARA (Kuning Lembut) */
+        tr.status-win { background-color: #FFFDE7; }
+
+        /* ATURAN STYLE (Ini yang hilang tadi) */
+        .rules-box { background: white; padding: 15px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 20px;}
+        .rules-box h3 { border-bottom: 2px solid var(--accent); padding-bottom: 6px; color: var(--primary); font-size: 14px; margin-top: 15px; font-weight: 800; }
+        .rules-box ul { padding-left: 18px; color: #555; line-height: 1.5; font-size: 12px; font-weight: 500; margin-top: 5px;}
+        .rules-box li { margin-bottom: 6px; }
+
+        /* NAV */
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; border-top-left-radius: 15px; border-top-right-radius: 15px; display: flex; padding: 10px 0; z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+        .nav-btn { flex: 1; text-align: center; font-size: 9px; color: #ccc; text-decoration: none; transition: all 0.3s; font-weight: 600; cursor:pointer; }
+        .nav-btn span { display: block; font-size: 16px; margin-bottom: 3px; filter: grayscale(100%); opacity: 0.5; }
+        .nav-btn.active { color: var(--primary); font-weight: 800; }
+        .nav-btn.active span { filter: grayscale(0%); opacity: 1; transform: translateY(-2px); }
+
+        .empty-text { text-align:center; color:#aaa; font-size:12px; padding:20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-wrapper">
+        <div class="padel-racket-bg"></div>
+        <div class="header-content">
+            <h1 class="header-title">PADEL LOVERS</h1>
+            <div class="header-sub">Mixed Doubles Lower Bronze</div>
+            <div class="header-tag">Live Score & Schedule</div>
+        </div>
+    </div>
+
+    <div id="view-jadwal" class="container">
+        <div id="jadwal-content"></div>
+    </div>
+
+    <div id="view-klasemen" class="container hidden">
+        <div id="klasemen-content"></div>
+    </div>
+
+    <div id="view-bagan" class="container hidden">
+        <h2 style="text-align:center; color:var(--primary); font-size:14px; margin-bottom:12px; font-weight:800;">Babak Gugur (Knockout)</h2>
+        <div id="bagan-content"></div>
+    </div>
+
+    <div id="view-peraturan" class="container hidden rules-box">
         
         <h3>A. Format Pertandingan</h3>
         <ul>
@@ -45,3 +194,164 @@
             <i>Keputusan Panitia bersifat mutlak & tidak dapat diganggu gugat.</i>
         </div>
     </div>
+
+    <div class="nav">
+        <a class="nav-btn active" onclick="go('jadwal', this)"><span>📅</span>Jadwal</a>
+        <a class="nav-btn" onclick="go('klasemen', this)"><span>📊</span>Klasemen</a>
+        <a class="nav-btn" onclick="go('bagan', this)"><span>🏆</span>Bagan</a>
+        <a class="nav-btn" onclick="go('peraturan', this)"><span>📜</span>Aturan</a>
+    </div>
+
+    <script>
+        // --- KONEKSI DATABASE SUPABASE ---
+        const SUPABASE_URL = 'https://gubcvxiupehbdpigrdct.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_k1y6fNI2opEXhwqKMbGYcA__2nD0yT6';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let matches = [];
+
+        async function init() {
+            const { data } = await db.from('matches').select('*').order('created_at', {ascending: true});
+            if(data) { matches = data; renderAll(); }
+        }
+        db.channel('public:matches').on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, () => init()).subscribe();
+
+        function renderAll() {
+            renderJadwal();
+            renderBagan();
+            renderKlasemen();
+        }
+
+        // --- HELPER BUAT KARTU ---
+        function createCardHTML(m) {
+            let sA = m.set1_a + m.set2_a + m.set3_a + m.set4_a + m.set5_a;
+            let sB = m.set1_b + m.set2_b + m.set3_b + m.set4_b + m.set5_b;
+            let skorText = `${sA} - ${sB}`;
+            
+            let isLive = (m.status === 'LIVE');
+            let liveClass = isLive ? 'is-live' : '';
+            let scoreClass = 'score-pill';
+            let metaHTML = '';
+            let smallPointHTML = '';
+
+            let courtBadge = `<span class="court-badge">${m.court_name}</span>`;
+
+            if (isLive) {
+                metaHTML = `<div class="meta-info"><div class="live-tag"><div class="dot-live"></div> LIVE</div>${courtBadge}</div>`;
+                smallPointHTML = `<span class="small-points" style="color:black">${m.points_a} - ${m.points_b}</span>`;
+            } else {
+                let time = m.time || '';
+                let date = m.date || '';
+                metaHTML = `<div class="meta-info"><span>${date} ${time}</span>${courtBadge}</div>`;
+                
+                if(m.status === 'PENDING' && sA+sB === 0) {
+                    skorText = "VS";
+                    scoreClass = "score-pill empty";
+                }
+            }
+
+            return `
+            <div class="match-card ${liveClass}">
+                <div class="card-header-row">
+                    <span class="babak-pill">${m.category} ${m.round}</span>
+                </div>
+                <div class="card-meta-row">${metaHTML}</div>
+                <div class="match-body">
+                    <div class="team left">${m.team_a}</div>
+                    <div class="${scoreClass}">
+                        ${skorText}
+                        ${smallPointHTML}
+                    </div>
+                    <div class="team right">${m.team_b}</div>
+                </div>
+            </div>`;
+        }
+
+        // 1. RENDER JADWAL (Group Only)
+        function renderJadwal() {
+            const el = document.getElementById('jadwal-content');
+            el.innerHTML = "";
+            const list = matches.filter(m => m.round.toLowerCase().includes('grup'));
+
+            if(list.length === 0) { el.innerHTML = '<div class="empty-text">Belum ada jadwal penyisihan.</div>'; return; }
+            list.forEach(m => { el.innerHTML += createCardHTML(m); });
+        }
+
+        // 2. RENDER BAGAN (Knockout Only)
+        function renderBagan() {
+            const el = document.getElementById('bagan-content');
+            el.innerHTML = "";
+            const list = matches.filter(m => !m.round.toLowerCase().includes('grup'));
+
+            if(list.length === 0) { el.innerHTML = '<div class="empty-text">Belum ada pertandingan babak gugur.</div>'; return; }
+            list.forEach(m => { el.innerHTML += createCardHTML(m); });
+        }
+
+        // 3. RENDER KLASEMEN (LOGIKA BARU: HANYA RANK 1 KUNING)
+        function renderKlasemen() {
+            const el = document.getElementById('klasemen-content');
+            el.innerHTML = "";
+            const grupMatches = matches.filter(m => m.round.toLowerCase().includes('grup'));
+            
+            if(grupMatches.length === 0) { el.innerHTML = '<div class="empty-text">Klasemen belum tersedia.</div>'; return; }
+
+            let groups = {};
+            grupMatches.forEach(m => {
+                let gName = m.round;
+                if(!groups[gName]) groups[gName] = {};
+                
+                [m.team_a, m.team_b].forEach(t => { if(!groups[gName][t]) groups[gName][t] = { mp:0, w:0, l:0, gd:0 }; });
+                
+                // Hitung Point Jika FINISHED
+                if(m.status === 'FINISHED') {
+                    let sA = groups[gName][m.team_a], sB = groups[gName][m.team_b];
+                    sA.mp++; sB.mp++;
+                    let totA = m.set1_a+m.set2_a+m.set3_a+m.set4_a+m.set5_a;
+                    let totB = m.set1_b+m.set2_b+m.set3_b+m.set4_b+m.set5_b;
+                    sA.gd += (totA - totB); sB.gd += (totB - totA);
+                    if(totA > totB) { sA.w++; sB.l++; } else { sB.w++; sA.l++; }
+                }
+            });
+
+            Object.keys(groups).sort().forEach(gName => {
+                let teams = groups[gName];
+                let sorted = Object.keys(teams).map(t => ({name:t, ...teams[t]}))
+                             .sort((a,b) => (b.w - a.w) || (b.gd - a.gd));
+
+                let rows = "";
+                sorted.forEach((t, i) => {
+                    // LOGIC BARU: i === 0 (Rank 1) saja yang kuning
+                    let hl = (i === 0) ? 'class="status-win"' : '';
+                    rows += `
+                    <tr ${hl}>
+                        <td>${i+1}</td>
+                        <td>${t.name}</td>
+                        <td>${t.mp}</td>
+                        <td>${t.w}</td>
+                        <td>${t.l}</td>
+                        <td>${t.gd}</td>
+                    </tr>`;
+                });
+
+                el.innerHTML += `
+                <div class="grup-card">
+                    <div class="grup-header">${gName}</div>
+                    <table>
+                        <thead><tr><th width="10">#</th><th>TIM</th><th width="10%">MP</th><th width="10%">W</th><th width="10%">L</th><th width="10%">GD</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
+            });
+        }
+
+        function go(id, btn) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById('view-'+id).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>
