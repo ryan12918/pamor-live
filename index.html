@@ -42,7 +42,6 @@
             overflow: hidden; margin-bottom: 15px;
         }
 
-        /* DESAIN RAKET PADEL (CSS BACKGROUND) */
         .padel-racket-bg {
             position: absolute;
             top: -40px; right: -50px;
@@ -78,7 +77,6 @@
         .meta-info { display: flex; align-items: center; gap: 6px; }
         .court-badge { background: #f5f5f5; color: #555; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; border: 1px solid #eee; }
 
-        /* LIVE STATE */
         .match-card.is-live { border: 2px solid var(--live-neon); box-shadow: 0 0 10px rgba(118, 255, 3, 0.2); }
         .match-card.is-live .score-pill { background: var(--live-neon); color: black; box-shadow: 0 0 8px var(--live-neon); animation: pulse-score 1.5s infinite; }
         .live-tag { color: #4CAF50; font-weight: 800; font-size: 9px; display: flex; align-items: center; gap: 4px; background: #e8f5e9; padding: 1px 6px; border-radius: 4px; }
@@ -93,21 +91,26 @@
         
         .score-pill { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 5px 14px; border-radius: 20px; font-size: 18px; font-weight: 800; min-width: 50px; text-align: center; box-shadow: 0 3px 8px rgba(194, 24, 91, 0.2); margin: 0 10px; display:flex; flex-direction:column; justify-content:center; }
         .score-pill.empty { background: white; color: var(--primary); border: 2px solid var(--accent); box-shadow: none; font-size: 13px; padding: 3px 12px; }
-        
         .small-points { font-size: 10px; display: block; margin-top: 2px; }
 
-        /* TABEL KLASEMEN */
+        /* LEGEND KLASEMEN (BARU) */
+        .legend-box {
+            background: #fff; padding: 10px; border-radius: 10px; margin-bottom: 15px;
+            font-size: 10px; color: #666; border: 1px solid #eee; line-height: 1.6;
+        }
+        .legend-box b { color: var(--primary); }
+
+        /* TABEL KLASEMEN (UPDATED) */
         .grup-card { background: white; border-radius: 12px; margin-bottom: 15px; overflow: hidden; box-shadow: var(--card-shadow); border: none; }
         .grup-header { background: #FFF0F5; padding: 10px 15px; color: var(--primary); font-size: 13px; font-weight: 800; border-bottom: 1px solid #fce4ec; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: white; color: #999; padding: 8px 5px; font-size: 9px; font-weight: 800; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; }
-        td { padding: 8px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; color: #444; font-weight: 600; }
-        th:nth-child(2), td:nth-child(2) { text-align: left; padding-left: 8px; width: 45%; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; } /* Font sedikit diperkecil agar muat */
+        th { background: white; color: #999; padding: 8px 2px; font-size: 9px; font-weight: 800; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; text-align: center; }
+        td { padding: 8px 2px; border-bottom: 1px solid #f9f9f9; text-align: center; color: #444; font-weight: 600; }
+        th:nth-child(2), td:nth-child(2) { text-align: left; padding-left: 5px; width: 35%; } /* Kolom Nama Tim */
         
-        /* WARNA JUARA (Kuning Lembut) */
         tr.status-win { background-color: #FFFDE7; }
 
-        /* ATURAN STYLE (Ini yang hilang tadi) */
+        /* ATURAN STYLE */
         .rules-box { background: white; padding: 15px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 20px;}
         .rules-box h3 { border-bottom: 2px solid var(--accent); padding-bottom: 6px; color: var(--primary); font-size: 14px; margin-top: 15px; font-weight: 800; }
         .rules-box ul { padding-left: 18px; color: #555; line-height: 1.5; font-size: 12px; font-weight: 500; margin-top: 5px;}
@@ -139,6 +142,17 @@
     </div>
 
     <div id="view-klasemen" class="container hidden">
+        
+        <div class="legend-box">
+            <div style="margin-bottom:5px; font-weight:bold; color:#333; border-bottom:1px dashed #ddd; padding-bottom:3px;">KETERANGAN TABEL:</div>
+            <b>MP:</b> Main (Matches Played) &bull; 
+            <b>W:</b> Menang (Win) &bull; 
+            <b>L:</b> Kalah (Lose)<br>
+            <b>GW:</b> Game Menang (Game Won) &bull; 
+            <b>GL:</b> Game Kalah (Game Lost)<br>
+            <b>GD:</b> Selisih Game (Game Difference)
+        </div>
+
         <div id="klasemen-content"></div>
     </div>
 
@@ -148,7 +162,6 @@
     </div>
 
     <div id="view-peraturan" class="container hidden rules-box">
-        
         <h3>A. Format Pertandingan</h3>
         <ul>
             <li><b>Penyisihan Grup:</b> 1 Set, First to 4 Games.
@@ -267,7 +280,7 @@
             </div>`;
         }
 
-        // 1. RENDER JADWAL (Group Only)
+        // 1. RENDER JADWAL
         function renderJadwal() {
             const el = document.getElementById('jadwal-content');
             el.innerHTML = "";
@@ -277,7 +290,7 @@
             list.forEach(m => { el.innerHTML += createCardHTML(m); });
         }
 
-        // 2. RENDER BAGAN (Knockout Only)
+        // 2. RENDER BAGAN
         function renderBagan() {
             const el = document.getElementById('bagan-content');
             el.innerHTML = "";
@@ -287,7 +300,7 @@
             list.forEach(m => { el.innerHTML += createCardHTML(m); });
         }
 
-        // 3. RENDER KLASEMEN (LOGIKA BARU: HANYA RANK 1 KUNING)
+        // 3. RENDER KLASEMEN (UPDATE: KOLOM GW & GL)
         function renderKlasemen() {
             const el = document.getElementById('klasemen-content');
             el.innerHTML = "";
@@ -300,15 +313,27 @@
                 let gName = m.round;
                 if(!groups[gName]) groups[gName] = {};
                 
-                [m.team_a, m.team_b].forEach(t => { if(!groups[gName][t]) groups[gName][t] = { mp:0, w:0, l:0, gd:0 }; });
+                // Init Data Tim (Sekarang ada gw dan gl)
+                [m.team_a, m.team_b].forEach(t => { 
+                    if(!groups[gName][t]) groups[gName][t] = { mp:0, w:0, l:0, gw:0, gl:0, gd:0 }; 
+                });
                 
                 // Hitung Point Jika FINISHED
                 if(m.status === 'FINISHED') {
                     let sA = groups[gName][m.team_a], sB = groups[gName][m.team_b];
                     sA.mp++; sB.mp++;
+                    
                     let totA = m.set1_a+m.set2_a+m.set3_a+m.set4_a+m.set5_a;
                     let totB = m.set1_b+m.set2_b+m.set3_b+m.set4_b+m.set5_b;
+                    
+                    // Hitung Game Won & Game Lost
+                    sA.gw += totA; sA.gl += totB;
+                    sB.gw += totB; sB.gl += totA;
+
+                    // Hitung GD
                     sA.gd += (totA - totB); sB.gd += (totB - totA);
+                    
+                    // Hitung Win/Lose Match
                     if(totA > totB) { sA.w++; sB.l++; } else { sB.w++; sA.l++; }
                 }
             });
@@ -320,8 +345,8 @@
 
                 let rows = "";
                 sorted.forEach((t, i) => {
-                    // LOGIC BARU: i === 0 (Rank 1) saja yang kuning
                     let hl = (i === 0) ? 'class="status-win"' : '';
+                    // KOLOM BARU DITAMBAHKAN DI SINI
                     rows += `
                     <tr ${hl}>
                         <td>${i+1}</td>
@@ -329,6 +354,8 @@
                         <td>${t.mp}</td>
                         <td>${t.w}</td>
                         <td>${t.l}</td>
+                        <td>${t.gw}</td>
+                        <td>${t.gl}</td>
                         <td>${t.gd}</td>
                     </tr>`;
                 });
@@ -337,7 +364,18 @@
                 <div class="grup-card">
                     <div class="grup-header">${gName}</div>
                     <table>
-                        <thead><tr><th width="10">#</th><th>TIM</th><th width="10%">MP</th><th width="10%">W</th><th width="10%">L</th><th width="10%">GD</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th width="20">#</th>
+                                <th>TIM</th>
+                                <th width="25">MP</th>
+                                <th width="25">W</th>
+                                <th width="25">L</th>
+                                <th width="25" style="background:#f9f9f9">GW</th>
+                                <th width="25" style="background:#f9f9f9">GL</th>
+                                <th width="25">GD</th>
+                            </tr>
+                        </thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>`;
