@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PADEL LOVERS</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
     <style>
-        /* --- COPY PASTE DARI STYLE 14 FEBRUARI --- */
+        /* --- COPY PASTE DARI DESAIN 14 FEBRUARI (JANGAN UBAH) --- */
         :root { 
             --primary: #C2185B;      
             --primary-dark: #880E4F; 
@@ -194,7 +194,7 @@
 
         // --- HELPER UNTUK MEMBUAT KARTU HTML (STYLE 14 FEB) ---
         function createCardHTML(m) {
-            // Logic Skor
+            // Logic Skor (Total Game)
             let sA = m.set1_a + m.set2_a + m.set3_a + m.set4_a + m.set5_a;
             let sB = m.set1_b + m.set2_b + m.set3_b + m.set4_b + m.set5_b;
             let skorText = `${sA} - ${sB}`;
@@ -209,7 +209,7 @@
             let courtBadge = `<span class="court-badge">${m.court_name}</span>`;
 
             if (isLive) {
-                // Jika Live: Tampilkan Badge Live, Skor Neon, Poin Kecil
+                // Jika Live: Tampilkan Badge Live Hijau, Skor Neon, Poin Kecil
                 metaHTML = `<div class="meta-info"><div class="live-tag"><div class="dot-live"></div> LIVE</div>${courtBadge}</div>`;
                 smallPointHTML = `<span class="small-points" style="color:black">${m.points_a} - ${m.points_b}</span>`;
             } else {
@@ -225,6 +225,7 @@
                 }
             }
 
+            // HTML KARTU (STRUKTUR SAMA PERSIS DENGAN KODE 14 FEB)
             return `
             <div class="match-card ${liveClass}">
                 <div class="card-header-row">
@@ -246,7 +247,7 @@
         function renderJadwal() {
             const el = document.getElementById('jadwal-content');
             el.innerHTML = "";
-            // Filter: Hanya yang mengandung kata "grup" (case insensitive)
+            // Filter: Hanya yang mengandung kata "grup"
             const list = matches.filter(m => m.round.toLowerCase().includes('grup'));
 
             if(list.length === 0) { el.innerHTML = '<div class="empty-text">Belum ada jadwal penyisihan.</div>'; return; }
