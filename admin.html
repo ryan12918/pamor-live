@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="color-scheme" content="dark">
+    
+    <title>WASIT PRO V9.7</title>
+    <style>
+        /* RESET & BASIC */
+        body { background: #121212; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; }
+        .hidden { display: none !important; }
+
+        /* LOGIN */
+        .login-box { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 100%; max-width: 320px; text-align: center; border: 1px solid #333; margin-top: 10vh; }
+        .inp-login { width: 100%; padding: 12px; margin: 8px 0; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 6px; text-align: center; font-size: 16px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* MATCH INFO & SERVER */
+        .match-card { width: 100%; max-width: 450px; background: #1e1e1e; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #333; margin-bottom: 5px; }
+        
+        .team-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        .team-box { width: 45%; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; position: relative; }
+        .team-box.serving { background: #2c2c2c; border-color: #ffd700; }
+        
+        .ball-icon { position: absolute; top: -8px; right: -8px; font-size: 16px; display: none; }
+        .team-box.serving .ball-icon { display: block; }
+
+        .t-name { font-size: 14px; font-weight: 700; line-height: 1.2; word-wrap: break-word; }
+        .t-a { color: #4fc3f7; } .t-b { color: #ff8a65; }
+
+        /* NAVIGASI & MODE */
+        .ctrl-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; margin-bottom: 10px; gap: 5px; }
+        .set-nav { display: flex; align-items: center; background: #000; padding: 5px 10px; border-radius: 6px; border: 1px solid #333; flex: 1; justify-content: space-between; }
+        .btn-nav { background: #333; color: white; border: none; width: 30px; height: 30px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        
+        /* TOGGLE TIE BREAK */
+        .mode-toggle { background: #2c2c2c; padding: 5px 10px; border-radius: 6px; border: 1px solid #444; font-size: 10px; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .mode-toggle.active { background: #e65100; color: white; border-color: #ff9800; }
+
+        /* SCOREBOARD */
+        .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 450px; }
+        .col-score { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; text-align: center; }
+
+        .val-game { font-size: 50px; font-weight: 900; background: transparent; color: white; border: none; width: 100%; text-align: center; margin: 0; }
+        .btn-adj-row { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
+        .btn-adj { background: #333; color: #ccc; border: 1px solid #444; width: 100%; padding: 4px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        .val-point { font-size: 40px; font-weight: 800; background: #000; color: #ffd700; border: 1px solid #444; width: 100%; text-align: center; border-radius: 6px; margin-bottom: 10px; padding: 5px 0; }
+        
+        /* TOMBOL POIN */
+        .btn-pad { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .btn-pt { padding: 12px 0; background: #2c2c2c; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-pt:active { background: #555; transform: scale(0.95); }
+        .btn-win { grid-column: span 2; background: #28a745; color: white; }
+        
+        .btn-reset { grid-column: span 2; background: #c62828; color: white; font-size: 10px; padding: 8px; margin-top: 5px; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+    <div id="view-login" class="login-box">
+        <h3>WASIT PRO V9.7</h3>
+        <input id="inp-court" class="inp-login" placeholder="Court Name">
+        <input id="inp-pin" type="tel" class="inp-login" placeholder="PIN">
+        <button onclick="login()" class="btn-login">MASUK</button>
+    </div>
+
+    <div id="view-dash" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+        
+        <div class="match-card">
+            <div style="font-size:10px; color:#888; margin-bottom:5px;">KLIK NAMA UNTUK PINDAH SERVIS</div>
+            <div class="team-row">
+                <div class="team-box" id="box-a" onclick="toggleServer('a')">
+                    <div class="ball-icon">🎾</div>
+                    <div class="t-name t-a" id="name-a">Team A</div>
+                </div>
+                <div style="font-size:12px; font-weight:bold; color:#555;">VS</div>
+                <div class="team-box" id="box-b" onclick="toggleServer('b')">
+                    <div class="ball-icon">🎾</div>
+                    <div class="t-name t-b" id="name-b">Team B</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ctrl-bar">
+            <div class="set-nav">
+                <button class="btn-nav" onclick="changeSet(-1)">&#171;</button>
+                <div style="font-size:12px; font-weight:bold; color:#ffd700;">SET <span id="lbl-set">1</span></div>
+                <button class="btn-nav" onclick="changeSet(1)">&#187;</button>
+            </div>
+            <button class="mode-toggle" id="btn-mode" onclick="toggleMode()">
+                <span>TIE BREAK</span>
+                <div style="width:10px; height:10px; background:#555; border-radius:50%;" id="ind-mode"></div>
+            </button>
+        </div>
+
+        <div class="board-grid">
+            <div class="col-score">
+                <div class="btn-adj-row">
+                    <button class="btn-adj" onclick="adjGame('a', -1)">-</button>
+                    <input id="game-a" class="val-game" value="0" readonly>
+                    <button class="btn-adj" onclick="adjGame('a', 1)">+</button>
+                </div>
+                
+                <input id="point-a" class="val-point" value="0" readonly>
+                <div class="btn-pad" id="pad-a"></div>
+            </div>
+
+            <div class="col-score">
+                <div class="btn-adj-row">
+                    <button class="btn-adj" onclick="adjGame('b', -1)">-</button>
+                    <input id="game-b" class="val-game" value="0" readonly>
+                    <button class="btn-adj" onclick="adjGame('b', 1)">+</button>
+                </div>
+                
+                <input id="point-b" class="val-point" value="0" readonly>
+                <div class="btn-pad" id="pad-b"></div>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" style="margin-top:30px; background:transparent; border:none; color:#555; font-size:11px;">LOGOUT</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://gubcvxiupehbdpigrdct.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_k1y6fNI2opEXhwqKMbGYcA__2nD0yT6';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let matchId = null;
+        let currentSet = 1;
+        let isTieBreak = false; // Status Mode
+
+        // --- 1. LOGIN ---
+        async function login() {
+            const c = document.getElementById('inp-court').value.trim();
+            const p = document.getElementById('inp-pin').value.trim();
+            if(!c) return alert("Court?");
+
+            const { data } = await db.from('matches').select('*').ilike('court_name', c).eq('status', 'LIVE').single();
+            
+            if(!data) return alert("Belum ada Match LIVE di " + c);
+            if(data.pin && data.pin != p) return alert("PIN Salah!");
+
+            matchId = data.id;
+            loadMatch(data);
+        }
+
+        function loadMatch(m) {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-dash').classList.remove('hidden');
+
+            document.getElementById('name-a').innerText = m.team_a;
+            document.getElementById('name-b').innerText = m.team_b;
+            
+            currentSet = m.current_set || 1;
+            renderServer(m.server); // Render bola servis
+            renderScores(m);
+            renderButtons(); // Render tombol sesuai mode default (Normal)
+            
+            subscribeMatch();
+        }
+
+        // --- 2. LOGIKA TOMBOL DINAMIS ---
+        function toggleMode() {
+            isTieBreak = !isTieBreak; // Balik status
+            
+            const btn = document.getElementById('btn-mode');
+            const ind = document.getElementById('ind-mode');
+            
+            if(isTieBreak) {
+                btn.classList.add('active');
+                ind.style.background = 'white';
+            } else {
+                btn.classList.remove('active');
+                ind.style.background = '#555';
+            }
+            renderButtons(); // Gambar ulang tombol
+        }
+
+        function renderButtons() {
+            const padA = document.getElementById('pad-a');
+            const padB = document.getElementById('pad-b');
+            
+            let html = "";
+            
+            if(isTieBreak) {
+                // TOMBOL TIE BREAK (POSISI DIPERBAIKI: -1 KIRI, +1 KANAN)
+                html = `
+                    <button class="btn-pt" style="background:#444" onclick="addPt('TARGET', -1)">-1</button>
+                    <button class="btn-pt" onclick="addPt('TARGET', 1)">+1</button>
+                    <button class="btn-pt btn-win" onclick="winGame('TARGET')">GAME</button>
+                    <button class="btn-pt btn-reset" onclick="resetPoint()">RESET POIN</button>
+                `;
+            } else {
+                // TOMBOL NORMAL (15, 30, 40)
+                html = `
+                    <button class="btn-pt" onclick="setPt('TARGET', '15')">15</button>
+                    <button class="btn-pt" onclick="setPt('TARGET', '30')">30</button>
+                    <button class="btn-pt" onclick="setPt('TARGET', '40')">40</button>
+                    <button class="btn-pt" onclick="setPt('TARGET', 'AD')">AD</button>
+                    <button class="btn-pt btn-win" onclick="winGame('TARGET')">GAME</button>
+                    <button class="btn-pt btn-reset" onclick="resetPoint()">RESET POIN</button>
+                `;
+            }
+
+            padA.innerHTML = html.replaceAll('TARGET', 'a');
+            padB.innerHTML = html.replaceAll('TARGET', 'b');
+        }
+
+        // --- 3. LOGIKA SKOR & SERVER ---
+        
+        async function toggleServer(team) {
+            renderServer(team);
+            await db.from('matches').update({ server: team }).eq('id', matchId);
+        }
+
+        function renderServer(team) {
+            document.getElementById('box-a').classList.remove('serving');
+            document.getElementById('box-b').classList.remove('serving');
+            if(team === 'a') document.getElementById('box-a').classList.add('serving');
+            else document.getElementById('box-b').classList.add('serving');
+        }
+
+        function renderScores(m) {
+            document.getElementById('lbl-set').innerText = currentSet;
+            document.getElementById('game-a').value = m[`set${currentSet}_a`] || 0;
+            document.getElementById('game-b').value = m[`set${currentSet}_b`] || 0;
+            document.getElementById('point-a').value = m.points_a || '0';
+            document.getElementById('point-b').value = m.points_b || '0';
+            
+            if(m.server) renderServer(m.server);
+        }
+
+        async function resetPoint() {
+            if(!confirm("Reset Poin jadi 0-0?")) return;
+            document.getElementById('point-a').value = '0';
+            document.getElementById('point-b').value = '0';
+            await db.from('matches').update({ points_a: '0', points_b: '0' }).eq('id', matchId);
+        }
+
+        async function setPt(team, val) {
+            document.getElementById('point-'+team).value = val;
+            const field = `points_${team}`;
+            await db.from('matches').update({ [field]: val }).eq('id', matchId);
+        }
+
+        async function addPt(team, delta) {
+            const el = document.getElementById('point-'+team);
+            let now = parseInt(el.value);
+            if(isNaN(now)) now = 0;
+            let next = now + delta;
+            if(next < 0) next = 0;
+            
+            el.value = next;
+            const field = `points_${team}`;
+            await db.from('matches').update({ [field]: next }).eq('id', matchId);
+        }
+
+        async function winGame(team) {
+            if(!confirm("Menangkan Game ini?")) return;
+            
+            const fieldGame = `set${currentSet}_${team}`;
+            const elGame = document.getElementById('game-'+team);
+            let val = parseInt(elGame.value) + 1;
+            
+            elGame.value = val;
+            document.getElementById('point-a').value = '0';
+            document.getElementById('point-b').value = '0';
+
+            await db.from('matches').update({ 
+                [fieldGame]: val, 
+                points_a: '0', points_b: '0' 
+            }).eq('id', matchId);
+        }
+
+        async function adjGame(team, delta) {
+            const field = `set${currentSet}_${team}`;
+            const el = document.getElementById('game-'+team);
+            let val = parseInt(el.value) + delta;
+            if(val < 0) val = 0;
+            el.value = val;
+            await db.from('matches').update({ [field]: val }).eq('id', matchId);
+        }
+
+        async function changeSet(delta) {
+            const next = currentSet + delta;
+            if(next < 1 || next > 5) return;
+            
+            if(!confirm(`Pindah ke SET ${next}?`)) return;
+            currentSet = next;
+            await db.from('matches').update({ current_set: next, points_a:'0', points_b:'0' }).eq('id', matchId);
+        }
+
+        function subscribeMatch() {
+            db.channel('room-'+matchId).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'matches', filter: `id=eq.${matchId}` }, (payload) => {
+                const m = payload.new;
+                if(m.status !== 'LIVE') location.reload();
+                currentSet = m.current_set;
+                renderScores(m);
+            }).subscribe();
+        }
+    </script>
+</body>
+</html>
