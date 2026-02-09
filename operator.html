@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <title>MASTER CONTROL V9.8 (SECURE)</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         body { font-family: 'Segoe UI', sans-serif; padding: 10px; background: #eceff1; font-size: 11px; color: #333; overflow: hidden; }
         
-        /* LAYAR LOGIN (TUMPUKAN PALING ATAS) */
+        /* LAYAR LOGIN (FULL SCREEN) */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #212121; z-index: 999999;
@@ -150,48 +152,39 @@
 
     <script>
         // --- 1. SETTING KEAMANAN ---
-        const KODE_RAHASIA = "admin123"; // <--- GANTI PASSWORD DI SINI
-        let isUnlocked = false; // Status Kunci (Default: Terkunci)
+        const KODE_RAHASIA = "admin123"; // <--- PASSWORD DI SINI
+        let isUnlocked = false; 
 
         function checkPass() {
             const val = document.getElementById('pass-input').value;
             if(val === KODE_RAHASIA) {
-                // BUKA KUNCI
                 isUnlocked = true; 
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 document.body.style.overflow = 'auto';
-                
-                // BARU PANGGIL DATABASE
                 initSupabase(); 
             } else {
-                // SALAH
                 const err = document.getElementById('err-msg');
                 err.style.display = 'block';
             }
         }
 
-        // --- 2. SUPABASE LOGIC (DIBUNGKUS FUNGSI) ---
+        // --- 2. SUPABASE LOGIC ---
         const SUPABASE_URL = 'https://gubcvxiupehbdpigrdct.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_k1y6fNI2opEXhwqKMbGYcA__2nD0yT6';
         let db;
 
-        // Fungsi ini HANYA jalan setelah password benar
         function initSupabase() {
-            if(!isUnlocked) return; // Double check
+            if(!isUnlocked) return;
             db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            
-            // Load Data Awal
             loadData();
-
-            // Hidupkan Realtime
             db.channel('public:matches').on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, () => {
-                if(isUnlocked) loadData(); // Hanya update kalau sudah unlock
+                if(isUnlocked) loadData();
             }).subscribe();
         }
 
         async function loadData() {
-            if(!isUnlocked || !db) return; // Stop jika belum login
+            if(!isUnlocked || !db) return;
             const { data } = await db.from('matches').select('*').order('created_at', {ascending: true});
             if(data) render(data);
         }
@@ -237,11 +230,7 @@
             });
         }
 
-        // --- FUNGSI UPDATE ---
-        async function upd(id, field, val) { 
-            if(!isUnlocked) return; 
-            showToast(); await db.from('matches').update({[field]: val}).eq('id', id); 
-        }
+        async function upd(id, field, val) { if(!isUnlocked) return; showToast(); await db.from('matches').update({[field]: val}).eq('id', id); }
         async function toggleStatus(id, st, crt) {
             if(!isUnlocked) return;
             let next = st === 'LIVE' ? 'PENDING' : 'LIVE';
@@ -251,10 +240,7 @@
             }
             await db.from('matches').update({status: next}).eq('id', id);
         }
-        async function setFinish(id) {
-            if(!isUnlocked || !confirm("Selesai?")) return;
-            await db.from('matches').update({status: 'FINISHED'}).eq('id', id);
-        }
+        async function setFinish(id) { if(!isUnlocked || !confirm("Selesai?")) return; await db.from('matches').update({status: 'FINISHED'}).eq('id', id); }
         async function saveMatch() {
             if(!isUnlocked) return;
             const payload = {
@@ -278,7 +264,6 @@
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function showToast() { const t=document.getElementById('toast'); t.style.display='block'; setTimeout(()=>t.style.display='none',800); }
-
     </script>
 </body>
 </html>
